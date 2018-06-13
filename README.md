@@ -1,2 +1,5 @@
 # Pattern-Database-Heuristic
-My implementation of Pattern Database heuristc for solving sliding puzzle.
+This repo contains a Python implementation of Additive Pattern Database heuristc for sliding puzzle as described in this [https://www.aaai.org/Papers/JAIR/Vol22/JAIR-2209.pdf][paper]
+
+
+Although the Python implmentation

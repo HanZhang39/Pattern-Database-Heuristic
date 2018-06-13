@@ -1,4 +1,6 @@
 from heapq import heappop, heappush
+from collections import deque
+import pickle
 
 def a_star_search(start, goal, heuristic):
     closed_set = set()
@@ -26,68 +28,59 @@ def a_star_search(start, goal, heuristic):
 
         closed_set.add(current)
 
-        for neighbor in current.get_children():
+        for dist, neighbor in current.get_children():
             # allow reopen
             if neighbor in closed_set:
                 continue
 
-            if neighbor not in gscore or gscore[current] + 1 < gscore[neighbor]:
-                gscore[neighbor] = gscore[current] + 1
+            if neighbor not in gscore or gscore[current] + dist < gscore[neighbor]:
+                gscore[neighbor] = gscore[current] + dist
                 came_from[neighbor] = current
                 heappush(oheap, (gscore[neighbor] + heuristic(neighbor), neighbor))
 
-NODE_CNT = 0
 
-def ida_star_search(start, goal, heuristic, bound=0, peri=None):
-    global NODE_CNT
-    NODE_CNT = 0
+def ida_star_search(start, goal, heuristic, bound=0):
+    node_cnt = 0
     bound = heuristic(start)
     path = [start]
 
-    if peri is None:
-        print("No perimeter used")
-
     while True:
         print(f"current bound: {bound}")
-        t = search(path, goal, bound, heuristic, peri)
-        if t[0]:
-            print(NODE_CNT)
-            return t[1]
-        if t[1] is None:
-            return t[1]
-        bound = t[1]
+        finished, bound, cnt = search(path, goal, bound, heuristic)
+        node_cnt += cnt
+        if finished:
+            print(f"totalcnt: {node_cnt}")
+            return path
+        if bound is None:
+            print(f"totalcnt: {node_cnt}")
+            print("Not found")
+            return None
 
-def search(path, goal, bound, heuristic, peri=None):
-    global NODE_CNT
-    NODE_CNT += 1
+def search(path, goal, bound, heuristic):
+    node_cnt = 1
     node = path[-1]
 
     h = heuristic(node)
 
     f = len(path) - 1 + h
     if f > bound:
-        return (False, f)
-
-    if peri and h <= peri.depth :
-        if peri[node] is not None:
-            print("using perimeter ")
-            path += peri.get_path(node)
-            return (True, path)
+        return (False, f, node_cnt)
 
     if node == goal:
-        return (True, path)
+        return (True, None, node_cnt)
     res = None
-    for succ in node.get_children():
+    for _, succ in node.get_children():
         if succ not in path:
             path.append(succ)
-            t = search(path, goal, bound, heuristic, peri)
-            if t[0]:
-                return (True, path)
-            if t[1] is not None:
+            finished, new_bound, cnt = search(path, goal, bound, heuristic)
+            node_cnt += cnt
+            if finished:
+                return (True, None, node_cnt)
+            if new_bound is not None:
                 if res is None:
-                    res = t[1]
+                    res = new_bound
                 else:
-                    res = min(res, t[1])
+                    res = min(res, new_bound)
             path.pop()
-    return (False, res)
+    return (False, res, node_cnt)
  
