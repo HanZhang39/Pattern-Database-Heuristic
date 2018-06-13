@@ -3,3 +3,5 @@ This repo contains a Python implementation of Additive Pattern Database heuristc
 
 
 Although the Python implementation is much slower regarding time, it has similar node expansion and estimated heuristic as reported
+
+Check our heuristic_and_search.ipynb for instruction
